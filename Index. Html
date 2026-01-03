@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق الطقس</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(to bottom, #1e3c72, #2a5298);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .weather-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            font-size: 2.2rem;
+        }
+        
+        .subtitle {
+            margin-bottom: 30px;
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        .search-box {
+            display: flex;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
+        
+        #cityInput {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            outline: none;
+        }
+        
+        #cityInput::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        #searchBtn {
+            background: #00c6ff;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 0 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #searchBtn:hover {
+            background: #00b4e6;
+            transform: translateY(-2px);
+        }
+        
+        .weather-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+        
+        .city-name {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .temperature {
+            font-size: 4.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .weather-description {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .weather-icon {
+            font-size: 3rem;
+            margin: 20px 0;
+        }
+        
+        .details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 25px;
+        }
+        
+        .detail-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .detail-item i {
+            font-size: 1.8rem;
+            color: #00c6ff;
+        }
+        
+        .detail-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .detail-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .error-message {
+            background: rgba(255, 50, 50, 0.2);
+            border: 1px solid rgba(255, 100, 100, 0.5);
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .cities-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        .city-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .city-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 600px) {
+            .weather-container {
+                padding: 25px;
+            }
+            
+            .temperature {
+                font-size: 3.5rem;
+            }
+            
+            .details {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="weather-container">
+        <h1><i class="fas fa-cloud-sun"></i> تطبيق الطقس</h1>
+        <p class="subtitle">اعرف حالة الطقس في أي مدينة حول العالم</p>
+        
+        <div class="search-box">
+            <input type="text" id="cityInput" placeholder="ادخل اسم المدينة...">
+            <button id="searchBtn"><i class="fas fa-search"></i> بحث</button>
+        </div>
+        
+        <div class="weather-card" id="weatherCard">
+            <div class="city-name">
+                <i class="fas fa-map-marker-alt"></i>
+                <span id="cityName">القاهرة</span>
+            </div>
+            
+            <div class="temperature" id="temperature">25°C</div>
+            
+            <div class="weather-description" id="weatherDescription">
+                <i class="fas fa-sun"></i>
+                <span>مشمس</span>
+            </div>
+            
+            <div class="weather-icon" id="weatherIcon">☀️</div>
+            
+            <div class="details">
+                <div class="detail-item">
+                    <i class="fas fa-temperature-high"></i>
+                    <div class="detail-value" id="feelsLike">27°C</div>
+                    <div class="detail-label">الاحساس الحراري</div>
+                </div>
+                
+                <div class="detail-item">
+                    <i class="fas fa-tint"></i>
+                    <div class="detail-value" id="humidity">45%</div>
+                    <div class="detail-label">الرطوبة</div>
+                </div>
+                
+                <div class="detail-item">
+                    <i class="fas fa-wind"></i>
+                    <div class="detail-value" id="windSpeed">12 كم/س</div>
+                    <div class="detail-label">سرعة الرياح</div>
+                </div>
+                
+                <div class="detail-item">
+                    <i class="fas fa-compress-arrows-alt"></i>
+                    <div class="detail-value" id="pressure">1013 hPa</div>
+                    <div class="detail-label">الضغط الجوي</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="error-message" id="errorMessage">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>لم نتمكن من العثور على المدينة. حاول مرة أخرى.</span>
+        </div>
+        
+        <div class="cities-list">
+            <button class="city-btn" data-city="القاهرة">القاهرة</button>
+            <button class="city-btn" data-city="الإسكندرية">الإسكندرية</button>
+            <button class="city-btn" data-city="دبي">دبي</button>
+            <button class="city-btn" data-city="الرياض">الرياض</button>
+            <button class="city-btn" data-city="لندن">لندن</button>
+            <button class="city-btn" data-city="نيويورك">نيويورك</button>
+        </div>
+    </div>
+
+    <script>
+        // عناصر DOM
+        const cityInput = document.getElementById('cityInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const weatherCard = document.getElementById('weatherCard');
+        const cityName = document.getElementById('cityName');
+        const temperature = document.getElementById('temperature');
+        const weatherDescription = document.getElementById('weatherDescription');
+        const weatherIcon = document.getElementById('weatherIcon');
+        const feelsLike = document.getElementById('feelsLike');
+        const humidity = document.getElementById('humidity');
+        const windSpeed = document.getElementById('windSpeed');
+        const pressure = document.getElementById('pressure');
+        const errorMessage = document.getElementById('errorMessage');
+        const cityButtons = document.querySelectorAll('.city-btn');
+        
+        // بيانات الطقس الافتراضية
+        const defaultWeather = {
+            city: "القاهرة",
+            temp: 25,
+            description: "مشمس",
+            feels_like: 27,
+            humidity: 45,
+            wind_speed: 12,
+            pressure: 1013,
+            icon: "☀️",
+            iconClass: "fas fa-sun"
+        };
+        
+        // بيانات طقس مختلفة للمدن
+        const weatherData = {
+            "القاهرة": { temp: 25, description: "مشمس", feels_like: 27, humidity: 45, wind_speed: 12, pressure: 1013, icon: "☀️", iconClass: "fas fa-sun" },
+            "الإسكندرية": { temp: 22, description: "غائم جزئياً", feels_like: 24, humidity: 65, wind_speed: 18, pressure: 1015, icon: "⛅", iconClass: "fas fa-cloud-sun" },
+            "دبي": { temp: 35, description: "حار", feels_like: 38, humidity: 30, wind_speed: 8, pressure: 1005, icon: "🔥", iconClass: "fas fa-sun" },
+            "الرياض": { temp: 32, description: "مشمس", feels_like: 34, humidity: 25, wind_speed: 15, pressure: 1010, icon: "☀️", iconClass: "fas fa-sun" },
+            "لندن": { temp: 12, description: "ممطر", feels_like: 10, humidity: 85, wind_speed: 20, pressure: 1008, icon: "🌧️", iconClass: "fas fa-cloud-rain" },
+            "نيويورك": { temp: 18, description: "غائم", feels_like: 17, humidity: 70, wind_speed: 14, pressure: 1012, icon: "☁️", iconClass: "fas fa-cloud" }
+        };
+        
+        // تحديث واجهة الطقس
+        function updateWeatherUI(city, data) {
+            // إخفاء رسالة الخطأ
+            errorMessage.style.display = 'none';
+            
+            // تحديث البيانات
+            cityName.textContent = city;
+            temperature.textContent = `${data.temp}°C`;
+            weatherDescription.innerHTML = `<i class="${data.iconClass}"></i><span>${data.description}</span>`;
+            weatherIcon.textContent = data.icon;
+            feelsLike.textContent = `${data.feels_like}°C`;
+            humidity.textContent = `${data.humidity}%`;
+            windSpeed.textContent = `${data.wind_speed} كم/س`;
+            pressure.textContent = `${data.pressure} hPa`;
+            
+            // تأثير ظهور
+            weatherCard.classList.add('fade-in');
+            setTimeout(() => weatherCard.classList.remove('fade-in'), 500);
+            
+            // تغيير الخلفية حسب الطقس
+            updateBackground(data.description);
+        }
+        
+        // تغيير الخلفية حسب حالة الطقس
+        function updateBackground(description) {
+            const body = document.body;
+            
+            if (description.includes("مشمس") || description.includes("حار")) {
+                body.style.background = "linear-gradient(to bottom, #ff7e5f, #feb47b)";
+            } else if (description.includes("غائم")) {
+                body.style.background = "linear-gradient(to bottom, #757F9A, #D7DDE8)";
+            } else if (description.includes("ممطر")) {
+                body.style.background = "linear-gradient(to bottom, #1e3c72, #2a5298)";
+            } else {
+                body.style.background = "linear-gradient(to bottom, #1e3c72, #2a5298)";
+            }
+        }
+        
+        // البحث عن مدينة
+        function searchCity() {
+            const city = cityInput.value.trim();
+            
+            if (city === "") {
+                showError("من فضلك أدخل اسم المدينة");
+                return;
+            }
+            
+            // البحث في البيانات
+            if (weatherData[city]) {
+                updateWeatherUI(city, weatherData[city]);
+                cityInput.value = "";
+            } else {
+                showError(`لم نتمكن من العثور على بيانات الطقس لـ "${city}"`);
+            }
+        }
+        
+        // عرض رسالة الخطأ
+        function showError(message) {
+            errorMessage.querySelector('span').textContent = message;
+            errorMessage.style.display = 'block';
+            
+            // إخفاء الرسالة بعد 5 ثواني
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        // تهيئة التطبيق
+        function initApp() {
+            // عرض البيانات الافتراضية
+            updateWeatherUI(defaultWeather.city, defaultWeather);
+            
+            // أحداث البحث
+            searchBtn.addEventListener('click', searchCity);
+            
+            cityInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchCity();
+                }
+            });
+            
+            // أحداث أزرار المدن
+            cityButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const city = button.getAttribute('data-city');
+                    if (weatherData[city]) {
+                        updateWeatherUI(city, weatherData[city]);
+                        cityInput.value = "";
+                    }
+                });
+            });
+            
+            // التركيز على حقل البحث
+            cityInput.focus();
+        }
+        
+        // بدء التطبيق
+        document.addEventListener('DOMContentLoaded', initApp);
+        
+        // تحديث تلقائي كل 30 ثانية (محاكاة)
+        setInterval(() => {
+            const currentCity = cityName.textContent;
+            if (weatherData[currentCity]) {
+                // تغيير طفيف في البيانات لمحاكاة التحديث الحقيقي
+                const updatedData = { ...weatherData[currentCity] };
+                updatedData.temp += Math.random() > 0.5 ? 1 : -1;
+                updatedData.feels_like = updatedData.temp + 2;
+                
+                updateWeatherUI(currentCity, updatedData);
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
